@@ -3,13 +3,13 @@ import torch.nn as nn
 from layers import efficient_x3d_xs, r2plus1d_18
 
 
-class Stream_A(nn.Module):
+class Stream_c(nn.Module):
     """
     Args:
         model: str, a strig with the right name of the needed model, now supported "x3d", "r2plus1d" 
     """
     def __init__(self, model, out_dim, trainable = True):
-        super(Stream_A, self).__init__()
+        super(Stream_c, self).__init__()
         
         assert model in ['x3d', 'r2plus1d'] , "models suported for stream A are 'x3d', 'r2plus1d'"
 
