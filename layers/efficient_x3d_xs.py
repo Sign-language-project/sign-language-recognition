@@ -11,7 +11,7 @@ class E_x3d_xs(nn.Module):
         self.fc = nn.Linear(400, out_dim)
     
     def forward(self, x):
-        x = self.x3d()
+        x = self.x3d(x)
         x = self.relu(x)
         x = self.fc(x)
 
