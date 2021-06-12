@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
+import torchmetrics
 
 
 
@@ -16,14 +17,14 @@ class Base(pl.LightningModule):
     self.batch_size = batch_size
 
     #top 1 acc
-    self.train_acc_top1 = pl.metrics.Accuracy()
-    self.val_acc_top1 = pl.metrics.Accuracy()
-    self.test_acc_top1 = pl.metrics.Accuracy()
+    self.train_acc_top1 = torchmetrics.Accuracy()
+    self.val_acc_top1 = torchmetrics.Accuracy()
+    self.test_acc_top1 = torchmetrics.Accuracy()
 
     #top 5 acc
-    self.train_acc_top5 = pl.metrics.Accuracy(top_k= 5)
-    self.val_acc_top5 = pl.metrics.Accuracy(top_k= 5)
-    self.test_acc_top5 = pl.metrics.Accuracy(top_k= 5)
+    self.train_acc_top5 = torchmetrics.Accuracy(top_k= 5)
+    self.val_acc_top5 = torchmetrics.Accuracy(top_k= 5)
+    self.test_acc_top5 = torchmetrics.Accuracy(top_k= 5)
 
   def forward(self, x):
     logits = self.model(x)
@@ -35,8 +36,8 @@ class Base(pl.LightningModule):
       logits = self(x)
       loss = self.loss_fn(logits, y)
       self.log("train_loss", loss)
-      self.train_acc_top1(torch.argmax(logits, dim =1), y)
-      self.train_acc_top5(torch.argmax(logits, dim =1), y)
+      self.train_acc_top1(logits.softmax(dim=-1), y)
+      self.train_acc_top5(logits.softmax(dim=-1), y)
       self.log("train_acc_top1", self.train_acc_top1, on_step= False, on_epoch=True, prog_bar= True)
       self.log("train_acc_top5", self.train_acc_top5, on_step= False, on_epoch=True, prog_bar= True)
       return loss
@@ -47,9 +48,9 @@ class Base(pl.LightningModule):
       logits = self(x)
       loss = self.loss_fn(logits, y)
       self.log("val_loss", loss, prog_bar=True)
-      self.val_acc_top1(torch.argmax(logits, dim =1), y)
+      self.val_acc_top1(logits.softmax(dim=-1), y)
       self.log('val_acc_top1', self.val_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
-      self.val_acc_top5(torch.argmax(logits, dim =1), y)
+      self.val_acc_top5(logits.softmax(dim=-1), y)
       self.log('val_acc_top5', self.val_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
   
 
@@ -59,9 +60,9 @@ class Base(pl.LightningModule):
     logits = self(x)
     loss = self.loss_fn(logits, y)
     self.log("test_loss", loss, prog_bar=True)
-    self.test_acc_top1(torch.argmax(logits, dim =1), y)
+    self.test_acc_top1(logits.softmax(dim=-1), y)
     self.log('test_acc_top1', self.val_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
-    self.test_acc_top5(torch.argmax(logits, dim =1), y)
+    self.test_acc_top5(logits.softmax(dim=-1), y)
     self.log('test_acc_top5', self.val_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
   
   def configure_optimizers(self):
