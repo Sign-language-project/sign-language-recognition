@@ -141,3 +141,35 @@ class Transform:
     #transpose the tensor to the shape (C, T, H, W)
     frames_ = frames_.permute((1, 0, 2, 3))
     return frames_
+
+
+#needed transforms for each video
+class Transform_raft:
+  """
+  class to make the needed transforms for each video for raft optical flow.
+  params:
+    size: an int with the value of h and w (assumed the they are equal)
+  on object call:
+    returns the transformed frames tensor.
+  """
+  def __init__(self, size = 256):
+    self.size = size
+    self.resize = torchvision.transforms.Resize((self.size, self.size), interpolation= torchvision.transforms.InterpolationMode.BICUBIC)
+
+  def __call__(self, video):
+    frames = video / 255.0 #shape (T, H, W, C)
+
+    t, h, w, c = frames.shape  #get the shape
+    frames = torch.from_numpy(frames)  #transform the frames to torch tensors
+
+    frames_ = torch.zeros([t, c, self.size, self.size])
+    frames = frames.permute((0, 3, 1, 2)) #reshape the frames to be resized #shape (T, C, H, W)
+
+    #resize and normalize
+    for i in range(t):
+      frames_[i]= self.resize(frames[i])
+      frames_[i]= 2 * (frames[i] ) - 1.0 #scalling
+    
+    #transpose the tensor to the shape (C, T, H, W)
+    frames_ = frames_.permute((1, 0, 2, 3))
+    return frames_
