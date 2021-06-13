@@ -7,9 +7,11 @@ import torchmetrics
 
 LOSS = nn.CrossEntropyLoss()
 class Base(pl.LightningModule):
-  def __init__(self, model, LOSS = LOSS, lr = 1e-7, batch_size = 16, num_classes = 100):
+  def __init__(self, model, LOSS = LOSS, lr = 1e-7, batch_size = 4, num_classes = 266, lr_step_size=3, lr_gamma=0.3):
     super(Base, self).__init__()
     self.num_classes = num_classes
+    self.lr_step_size = lr_step_size
+    self.lr_gamma = lr_gamma
     #self.model = Stream_c(num_classes = self.num_classes)
     self.model = model
     self.loss_fn = LOSS
@@ -67,5 +69,5 @@ class Base(pl.LightningModule):
   
   def configure_optimizers(self):
     optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 3, gamma=0.3, last_epoch=-1, verbose= True)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = self.lr_step_size, gamma=self.lr_gamma, last_epoch=-1, verbose= True)
     return {'optimizer' : optimizer, 'lr_scheduler' : scheduler}
