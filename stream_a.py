@@ -30,7 +30,7 @@ class stream_a(nn.Module):
         #self.fc_out = nn.Linear(65 * hidden_feature, num_class)
 
     def forward(self, x): # (batch, 55, 100)
-        y = self.gc1(x[0]) # (batch, 55, 100)
+        y = self.gc1(x) # (batch, 55, 100)
         b, n, f = y.shape
         y = self.bn1(y.view(b, -1)).view(b, n, f)
         y = self.act_f(y)
