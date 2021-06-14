@@ -21,22 +21,29 @@ class TSL_dataset(Dataset):
     set: str or int, the set you want to train or test on. must be in [100, 300, 1000, 2000]. default = '100'
     subset: str, the subset of the dataset object. must be in ['train', 'val', 'test']. default = 'train'
     max_frames: int, number of max frames in the video. default = 12, the mean
-    streams: list, list of strings of the used streams 'a', 'b', 'c'.
+    streams: list, list of strings of the used streams 'a', 'b', 'c'. if none, default is stream c
   """
   def __init__(self,
+               streams = None,
                subset = 'train',
-               videos_path_root = "/content/drive/MyDrive/ZewZew/AUTSL",
+               videos_path_roots = ["/content/drive/MyDrive/ZewZew/AUTSL"],
                train_csv_file = "/content/drive/MyDrive/ZewZew/AUTSL/processed_csv_7fps/train_labels.csv",
                val_csv_file = "/content/drive/MyDrive/ZewZew/AUTSL/processed_csv_7fps/val_labels.csv",
                test_csv_file = "/content/drive/MyDrive/ZewZew/AUTSL/processed_csv_7fps/test_labels.csv",
                img_size = 256,
                max_frames = 16,
-               streams = None,
-               make_raft_transform = False,
+
                ):
     super(TSL_dataset).__init__()
     self.subset = subset
     assert subset in ['train', 'val', 'test'], 'subset must be in ["train", "val", "test"]'
+
+    if streams:
+        assert sum( [ (stream_letter.lower() in ['a', 'b','c']) for stream_letter in streams] ) == len(streams) , "you have entered a non valid stream letter, letters must be in 'abc'"
+
+    self.path_root_a = videos_path_roots[ streams.find('a') ]
+    self.path_root_b = videos_path_roots[ streams.find('b') ]
+    self.path_root_c = videos_path_roots[ streams.find('c') ]
 
     self.img_size = img_size
     self.max_frames = max_frames
@@ -50,8 +57,8 @@ class TSL_dataset(Dataset):
     self.df = self.get_df()
     self.video_paths = self.df['video_name'].tolist()
     self.labels = self.df['class'].tolist()
-    self.path_root = videos_path_root
 
+    self.streams = streams
     #video tansforms
     self.transforms = Transform(size = img_size)
 
@@ -103,29 +110,71 @@ class TSL_dataset(Dataset):
   def __getitem__(self, index):
     """
     """
-    video_path = os.path.join(self.path_root,self.video_paths[index])
+
     label = self.labels[index]
-    video = torch.load(video_path) #shape (C , T, H, W)
-    video = video.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
-    video = self.get_maxframes(self, video.numpy())  #make the frames num equal the max_frames
+    video_b = None
 
-    #if self.subset == 'train':
-    #  video = self.train_transforms(video)
+    video = []
+
+    if 'a' in self.streams:
+
+        pose_path = os.path.join(self.path_root_a ,self.video_paths[index])
+
+        pose = torch.load(pose_path) #shape (65 , 120)
+
+        video.append(pose)
 
 
-    video = video.transpose(0, 2, 3, 1) #shape (T , H, W, C)
+    if 'b' in self.stream:
 
-    if make_raft_transform:
-      video_raft = self.transforms_raft(video) #shape (C ,T, H, W)
+        video_b_path = os.path.join(self.path_root_b,self.video_paths[index])
 
-    if self.transforms:
-      video = self.transforms(video) #shape (C ,T, H, W)
+        video_b = torch.load(video_b_path) #shape (C , T, H, W)
 
-    if make_raft_transform:
-      video = (video , video_raft) #tuple the holds the preprocessed data for the normal 3D conv and raft optical flow
+        video_b = video_b.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
-    #zip the sample
-    sample = (video, label)
+        video_b = self.get_maxframes(self, video_b.numpy())  #make the frames num equal the max_frames
+
+        video_b = video_b.transpose(0, 2, 3, 1) #shape (T , H, W, C)
+
+        video_raft = self.transforms_raft(video_b) #shape (C ,T, H, W)
+
+        video.append(video_raft)
+
+
+    if  self.streams == None or 'c' in self.streams:
+
+        if video_b and self.transforms:
+
+            video_c = self.transforms(video_b) #shape (C ,T, H, W)
+
+            video.append(video_c)
+
+        elif video_b:
+
+            video.append(video_b)
+
+
+        else:
+
+            video_c_path = os.path.join(self.path_root_c,self.video_paths[index])
+
+            video_c = torch.load(video_c_path) #shape (C , T, H, W)
+
+            video_c = video_c.permute(1, 0, 2, 3) #shape (T , C, H, W)
+
+            video_c = self.get_maxframes(self, video_c.numpy())  #make the frames num equal the max_frames
+
+            video_c = video_c.transpose(0, 2, 3, 1) #shape (T , H, W, C)
+
+            if self.transforms:
+
+                video_c = self.transforms(video_c) #shape (C ,T, H, W)
+
+            video.append(video_c)
+
+
+    sample = (*video, label)
 
     return sample
