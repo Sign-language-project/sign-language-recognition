@@ -3,7 +3,7 @@ import torch
 import torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch import nn
-from RAFT.raft import RAFT
+from layers.RAFT.raft import RAFT
 import argparse
 from layers import efficient_x3d_xs, r2plus1d_18
 
