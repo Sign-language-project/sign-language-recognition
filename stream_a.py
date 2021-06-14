@@ -26,7 +26,7 @@ class stream_a(nn.Module):
         self.act_f = nn.Tanh()
 
         # self.fc1 = nn.Linear(55 * output_feature, fc1_out)
-        self.fc_out = nn.Linear(hidden_feature, num_class)
+        self.fc = nn.Linear(hidden_feature, num_class)
         #self.fc_out = nn.Linear(65 * hidden_feature, num_class)
 
     def forward(self, x): # (batch, 55, 100)
@@ -37,7 +37,7 @@ class stream_a(nn.Module):
         y = self.do(y)
 
         for i in range(self.num_stage):
-            y = self.gcbs[i](y) # (batch, 55, 100)
+            y = self.gcbs[i](y) # (batch, 65, 100)
 
         out = torch.mean(y, dim=1)  # (batch, 65, 100) --> # (batch, 100)
         #out = y.view(b, -1)
@@ -45,3 +45,7 @@ class stream_a(nn.Module):
         out = self.fc_out(out)
 
         return out # (batch, 100)
+<<<<<<< Updated upstream
+=======
+        
+>>>>>>> Stashed changes
