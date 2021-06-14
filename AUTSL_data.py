@@ -145,13 +145,13 @@ class TSL_dataset(Dataset):
 
     if  self.streams == None or 'c' in self.streams:
 
-        if video_b and self.transforms:
+        if (video_b is not None) and self.transforms:
 
             video_c = self.transforms(video_b) #shape (C ,T, H, W)
 
             video.append(video_c)
 
-        elif video_b:
+        elif (video_b is not None):
 
             video.append(video_b)
 
