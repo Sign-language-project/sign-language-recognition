@@ -126,7 +126,7 @@ class TSL_dataset(Dataset):
         video.append(pose)
 
 
-    if 'b' in self.stream:
+    if 'b' in self.streams:
 
         video_b_path = os.path.join(self.path_root_b,self.video_paths[index])
 
