@@ -25,5 +25,5 @@ class Stream_c(nn.Module):
 
 
     def forward(self, x):
-        x = self.model(x[0])
+        x = self.model(x)
         return x

@@ -47,7 +47,7 @@ class Stream_b (nn.Module):
 
         #images should be on the shape of B x C x T x H x W . H and W must be dividable by 8
 
-        images_batch = images_batch[0].permute(0,2,1,3,4).to(self.device) #shape  B x T x C x H x W
+        images_batch = images_batch.permute(0,2,1,3,4).to(self.device) #shape  B x T x C x H x W
 
 
         raftout = []
