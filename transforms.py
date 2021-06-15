@@ -37,7 +37,7 @@ class RandomCrop(object):
         return i, j, th, tw
 
     def __call__(self, imgs):
-        
+
         i, j, h, w = self.get_params(imgs, self.size)
 
         imgs = imgs[:, i:i+h, j:j+w, :]
@@ -137,7 +137,7 @@ class Transform:
     for i in range(t):
       frames_[i]= self.resize(frames[i])
       frames_[i]= self.normalize(frames_[i]) #normalize
-    
+
     #transpose the tensor to the shape (C, T, H, W)
     frames_ = frames_.permute((1, 0, 2, 3))
     return frames_
@@ -168,8 +168,8 @@ class Transform_raft:
     #resize and normalize
     for i in range(t):
       frames_[i]= self.resize(frames[i])
-      frames_[i]= 2 * (frames[i] ) - 1.0 #scalling
-    
+      frames_[i]= 2 * (frames_[i] ) - 1.0 #scalling
+
     #transpose the tensor to the shape (C, T, H, W)
     frames_ = frames_.permute((1, 0, 2, 3))
     return frames_
