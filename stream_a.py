@@ -7,10 +7,10 @@ from layers.GC_block import GraphConvolution_att, GC_Block
 
 
 class stream_a(nn.Module):
-    def __init__(self, num_class, input_feature=100, hidden_feature=100, p_dropout=0.3, num_stage=20, is_resi=True):
+    def __init__(self, out_dim, input_feature=100, hidden_feature=100, p_dropout=0.3, num_stage=20, is_resi=True):
         super(stream_a, self).__init__()
         self.num_stage = num_stage
-
+        self.out_dim = out_dim
         self.gc1 = GraphConvolution_att(input_feature, hidden_feature)
         self.bn1 = nn.BatchNorm1d(65 * hidden_feature)
 
@@ -26,7 +26,7 @@ class stream_a(nn.Module):
         self.act_f = nn.Tanh()
 
         # self.fc1 = nn.Linear(55 * output_feature, fc1_out)
-        self.fc_out = nn.Linear(hidden_feature, num_class)
+        self.fc = nn.Linear(hidden_feature, out_dim)
         #self.fc_out = nn.Linear(65 * hidden_feature, num_class)
 
     def forward(self, x): # (batch, 55, 100)
@@ -42,6 +42,6 @@ class stream_a(nn.Module):
         out = torch.mean(y, dim=1)  # (batch, 65, 100) --> # (batch, 100)
         #out = y.view(b, -1)
 
-        out = self.fc_out(out)
+        out = self.fc(out)
 
         return out # (batch, 100)

@@ -9,7 +9,7 @@ class Concate(nn.Module):
 
         self.n_streams = n_streams
         
-        self.alpha = torch.nn.Parameter(torch.zeros(in_dim , n_streams)) #512 , 2
+        self.alpha = torch.nn.Parameter(torch.zeros(in_dim , n_streams)) #indim , n_streams
 
         self.fc = nn.Linear(in_dim, out_dim )
     
