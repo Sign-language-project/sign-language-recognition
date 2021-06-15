@@ -12,7 +12,6 @@ class Base(pl.LightningModule):
     self.num_classes = num_classes
     self.lr_step_size = lr_step_size
     self.lr_gamma = lr_gamma
-    #self.model = Stream_c(num_classes = self.num_classes)
     self.model = model
     self.loss_fn = LOSS
     self.lr = lr
