@@ -11,7 +11,7 @@ from layers import efficient_x3d_xs, r2plus1d_18
 
 class Stream_b (nn.Module):
 
-    def __init__(self  , model, out_dim, raft_parameters_path, device, raft_iters = 12 , trainable = True):
+    def __init__(self, model, out_dim, raft_parameters_path, device, raft_iters = 12 , trainable = True, ckpt_path: str = None):
 
         super().__init__()
 
@@ -37,9 +37,17 @@ class Stream_b (nn.Module):
             self.model = r2plus1d_18.R2plus1d(out_dim)
 
         if not trainable:
+            self.model.fc = nn.Identity()
+            #check the path of the checkpoint
+            assert ckpt_path != None , "No checkpoint path is found, pass the path to the class __init__"
+            
+            #load the checkpoint
+            checkpoint = torch.load(ckpt_path)
+            model.model.load_state_dict(checkpoint['model'])
+            
             for i, param in enumerate(self.model.parameters()):
                 param.requires_grad = False
-            self.model.fc.requires_grad = True
+            self.model.fc = nn.Linear(400, out_dim)
 
 
 
