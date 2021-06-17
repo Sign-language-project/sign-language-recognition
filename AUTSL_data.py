@@ -24,7 +24,7 @@ class TSL_dataset(Dataset):
     streams: list, list of strings of the used streams 'a', 'b', 'c'. if none, default is stream c
   """
   def __init__(self,
-               streams = None,
+               streams = 'c',
                subset = 'train',
                videos_path_roots = ["/content/drive/MyDrive/ZewZew/AUTSL"],
                train_csv_file = "/content/drive/MyDrive/ZewZew/AUTSL/processed_csv_7fps/train_labels.csv",
@@ -36,14 +36,18 @@ class TSL_dataset(Dataset):
                ):
     super(TSL_dataset).__init__()
     self.subset = subset
+    self.streams = streams
+    if type(self.streams) != 'str':
+      self.streams = "".join(self.streams)
+    
     assert subset in ['train', 'val', 'test'], 'subset must be in ["train", "val", "test"]'
 
-    if streams:
-        assert sum( [ (stream_letter.lower() in ['a', 'b','c']) for stream_letter in streams] ) == len(streams) , "you have entered a non valid stream letter, letters must be in 'abc'"
+    if self.streams:
+        assert sum( [ (stream_letter.lower() in ['a', 'b','c']) for stream_letter in streams] ) == len(self.streams) , "you have entered a non valid stream letter, letters must be in 'abc'"
 
-    self.path_root_a = videos_path_roots[ streams.find('a') ]
-    self.path_root_b = videos_path_roots[ streams.find('b') ]
-    self.path_root_c = videos_path_roots[ streams.find('c') ]
+    self.path_root_a = videos_path_roots[ self.streams.find('a') ]
+    self.path_root_b = videos_path_roots[ self.streams.find('b') ]
+    self.path_root_c = videos_path_roots[ self.streams.find('c') ]
 
     self.img_size = img_size
     self.max_frames = max_frames
@@ -58,7 +62,6 @@ class TSL_dataset(Dataset):
     self.video_paths = self.df['video_name'].tolist()
     self.labels = self.df['class'].tolist()
 
-    self.streams = streams
     #video tansforms
     self.transforms = Transform(size = img_size)
 
@@ -77,7 +80,7 @@ class TSL_dataset(Dataset):
     df = pd.read_csv(self.csv_path) #read the file
 
     #drop any video with 0 frames
-    df = df[df['num_frames'] != 0].reset_index()
+    #df = df[df['num_frames'] != 0].reset_index()
     return df
 
   def __len__(self):
@@ -106,6 +109,27 @@ class TSL_dataset(Dataset):
       frames = np.append(frames, pad_frames , axis= 0)   #pad
 
     return frames
+  
+  def get_sampled_video(self, video, org_fps, n):
+    
+    #Get the sampled frames idxs
+    sampled_frames_idx = np.linspace(0, video.shape[0]-1, self.max_frames)
+    #new video tensor
+    sampled_video = video[sampled_frames_idx, :,:,:]
+    return sampled_video
+
+  def prepare_video(self, path):
+    """
+    upload the video, prepare it for the training
+    """
+
+    #load the video
+    video, _, _ = torchvision.io.read_video(path, pts_unit= 'sec')
+
+    #sample the video
+    video = self.get_sampled_video(video, org_fps = 30)
+    video = video.permute(0, 3, 1, 2) #T, C, H, W
+    return video
 
   def __getitem__(self, index):
     """
@@ -118,19 +142,19 @@ class TSL_dataset(Dataset):
     video = []
 
     if 'a' in self.streams:
+      path = f'{self.video_paths[index][:-4]}.pt'
+      pose_path = os.path.join(self.path_root_a ,path)
 
-        pose_path = os.path.join(self.path_root_a ,self.video_paths[index])
+      pose = torch.load(pose_path) #shape (65 , 120)
 
-        pose = torch.load(pose_path) #shape (65 , 120)
-
-        video.append(pose)
+      video.append(pose)
 
 
     if 'b' in self.streams:
 
         video_b_path = os.path.join(self.path_root_b,self.video_paths[index])
 
-        video_b = torch.load(video_b_path) #shape (C , T, H, W)
+        video_b = self.prepare_video(video_b_path) #shape (C , T, H, W)
 
         video_b = video_b.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
@@ -160,7 +184,7 @@ class TSL_dataset(Dataset):
 
             video_c_path = os.path.join(self.path_root_c,self.video_paths[index])
 
-            video_c = torch.load(video_c_path) #shape (C , T, H, W)
+            video_c = self.prepare_video(video_c_path)
 
             video_c = video_c.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
