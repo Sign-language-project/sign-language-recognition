@@ -128,7 +128,7 @@ class TSL_dataset(Dataset):
 
     #sample the video
     video = self.get_sampled_video(video, org_fps = 30)
-    video = video.permute(0, 3, 1, 2) #T, C, H, W
+    video = video.permute(3, 0, 1, 2) #T, C, H, W
     return video
 
   def __getitem__(self, index):
