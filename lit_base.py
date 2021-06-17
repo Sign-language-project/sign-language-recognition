@@ -37,8 +37,9 @@ class Base(pl.LightningModule):
       logits = self(x)
       loss = self.loss_fn(logits, y)
       self.log("train_loss", loss)
-      self.train_acc_top1(logits.softmax(dim=-1), y)
-      self.train_acc_top5(logits.softmax(dim=-1), y)
+      preds = logits.softmax(dim=-1)
+      self.train_acc_top1(preds, y)
+      self.train_acc_top5(preds, y)
       self.log("train_acc_top1", self.train_acc_top1, on_step= False, on_epoch=True, prog_bar= True)
       self.log("train_acc_top5", self.train_acc_top5, on_step= False, on_epoch=True, prog_bar= True)
       return loss
@@ -47,11 +48,12 @@ class Base(pl.LightningModule):
       x, y = batch
       y = y.squeeze()
       logits = self(x)
+      preds = logits.softmax(dim=-1)
       loss = self.loss_fn(logits, y)
       self.log("val_loss", loss, prog_bar=True)
-      self.val_acc_top1(logits.softmax(dim=-1), y)
+      self.val_acc_top1(preds, y)
       self.log('val_acc_top1', self.val_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
-      self.val_acc_top5(logits.softmax(dim=-1), y)
+      self.val_acc_top5(preds, y)
       self.log('val_acc_top5', self.val_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
 
 
@@ -59,11 +61,12 @@ class Base(pl.LightningModule):
     x, y = batch
     y = y.squeeze()
     logits = self(x)
+    preds = logits.softmax(dim=-1)
     loss = self.loss_fn(logits, y)
     self.log("test_loss", loss, prog_bar=True)
-    self.test_acc_top1(logits.softmax(dim=-1), y)
+    self.test_acc_top1(preds, y)
     self.log('test_acc_top1', self.val_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
-    self.test_acc_top5(logits.softmax(dim=-1), y)
+    self.test_acc_top5(preds, y)
     self.log('test_acc_top5', self.val_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
 
   def configure_optimizers(self):
