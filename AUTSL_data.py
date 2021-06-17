@@ -110,7 +110,7 @@ class TSL_dataset(Dataset):
 
     return frames
   
-  def get_sampled_video(self, video, org_fps, n):
+  def get_sampled_video(self, video, org_fps):
     
     #Get the sampled frames idxs
     sampled_frames_idx = np.linspace(0, video.shape[0]-1, self.max_frames)
