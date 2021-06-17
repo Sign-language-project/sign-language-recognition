@@ -199,6 +199,6 @@ class TSL_dataset(Dataset):
             video.append(video_c)
 
 
-    sample = (*video, label)
+    sample = (video, label)
 
     return sample
