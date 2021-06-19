@@ -199,7 +199,7 @@ class TSL_dataset(Dataset):
 
                 video_c = self.transforms(video_c) #shape (C ,T, H, W)
 
-            #video.append(video_c)
+            video.append(video_c)
 
 
     sample = (*video, label)
