@@ -80,7 +80,7 @@ class TSL_dataset(Dataset):
     df = pd.read_csv(self.csv_path) #read the file
 
     #drop any video with 0 frames
-    #df = df[df['num_frames'] != 0].reset_index()
+    df = df[df['num_frames'] != 0].reset_index()
     return df
 
   def __len__(self):
