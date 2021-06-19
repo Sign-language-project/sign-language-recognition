@@ -121,6 +121,7 @@ class TSL_dataset(Dataset):
   def prepare_video(self, path):
     """
     upload the video, prepare it for the training
+    Use this method if want to upload row video
     """
 
     #load the video
@@ -154,7 +155,8 @@ class TSL_dataset(Dataset):
 
         video_b_path = os.path.join(self.path_root_b,self.video_paths[index])
 
-        video_b = self.prepare_video(video_b_path) #shape (C , T, H, W)
+        #video_b = self.prepare_video(video_b_path) #shape (C , T, H, W)
+        video_b = torch.load(video_b_path)
 
         video_b = video_b.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
@@ -184,7 +186,8 @@ class TSL_dataset(Dataset):
 
             video_c_path = os.path.join(self.path_root_c,self.video_paths[index])
 
-            video_c = self.prepare_video(video_c_path)
+            #video_c = self.prepare_video(video_c_path)
+            video_c = torch.load(video_c_path)
 
             video_c = video_c.permute(1, 0, 2, 3) #shape (T , C, H, W)
 
@@ -199,6 +202,6 @@ class TSL_dataset(Dataset):
             #video.append(video_c)
 
 
-    sample = (video_c, label)
+    sample = (*video, label)
 
     return sample
