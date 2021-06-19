@@ -65,9 +65,9 @@ class Base(pl.LightningModule):
     loss = self.loss_fn(logits, y)
     self.log("test_loss", loss, prog_bar=True)
     self.test_acc_top1(preds, y)
-    self.log('test_acc_top1', self.val_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
+    self.log('test_acc_top1', self.test_acc_top1, on_step= False, on_epoch = True, prog_bar= True)
     self.test_acc_top5(preds, y)
-    self.log('test_acc_top5', self.val_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
+    self.log('test_acc_top5', self.test_acc_top5, on_step= False, on_epoch = True, prog_bar= True)
 
   def configure_optimizers(self):
     optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
