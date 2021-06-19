@@ -143,7 +143,7 @@ class TSL_dataset(Dataset):
     video = []
 
     if 'a' in self.streams:
-      path = f'{self.video_paths[index][:-4]}.pt'
+      path = f'{self.video_paths[index][:-3]}.pt'
       pose_path = os.path.join(self.path_root_a ,path)
 
       pose = torch.load(pose_path) #shape (65 , 120)
