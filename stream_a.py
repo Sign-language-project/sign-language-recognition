@@ -2,46 +2,28 @@
 import torch
 import torch.nn as nn
 
-from layers.GC_block import GraphConvolution_att, GC_Block
 
+class Stream_a(nn.Module):
+    def __init__(self, model, out_dim, trainable=False,  ckpt_path : str = None):
 
+        super(Stream_a, self).__init__()
 
-class stream_a(nn.Module):
-    def __init__(self, out_dim, input_feature=100, hidden_feature=100, p_dropout=0.3, num_stage=20, is_resi=True):
-        super(stream_a, self).__init__()
-        self.num_stage = num_stage
+        self.model = model
         self.out_dim = out_dim
-        self.gc1 = GraphConvolution_att(input_feature, hidden_feature)
-        self.bn1 = nn.BatchNorm1d(65 * hidden_feature)
 
-        self.gcbs = []
-        for i in range(num_stage):
-            self.gcbs.append(GC_Block(hidden_feature, p_dropout=p_dropout, is_resi=is_resi))
+        if not trainable:
+            self.model.fc = nn.Identity()
+            #check the path of the checkpoint
+            assert ckpt_path != None , "No checkpoint path is found, pass the path to the class __init__"
+            
+            #load the checkpoint
+            checkpoint = torch.load(ckpt_path)
+            self.model.load_state_dict(checkpoint['model'])
+            
+            for i, param in enumerate(self.model.parameters()):
+                param.requires_grad = False
+            self.model.fc = nn.Linear(400, out_dim)
 
-        self.gcbs = nn.ModuleList(self.gcbs)
-
-        # self.gc7 = GraphConvolution_att(hidden_feature, output_feature)
-
-        self.do = nn.Dropout(p_dropout)
-        self.act_f = nn.Tanh()
-
-        # self.fc1 = nn.Linear(55 * output_feature, fc1_out)
-        self.fc = nn.Linear(hidden_feature, out_dim)
-        #self.fc_out = nn.Linear(65 * hidden_feature, num_class)
-
-    def forward(self, x): # (batch, 55, 100)
-        y = self.gc1(x) # (batch, 55, 100)
-        b, n, f = y.shape
-        y = self.bn1(y.view(b, -1)).view(b, n, f)
-        y = self.act_f(y)
-        y = self.do(y)
-
-        for i in range(self.num_stage):
-            y = self.gcbs[i](y) # (batch, 55, 100)
-
-        out = torch.mean(y, dim=1)  # (batch, 65, 100) --> # (batch, 100)
-        #out = y.view(b, -1)
-
-        out = self.fc(out)
-
-        return out # (batch, 100)
+    def forward(self, x): # (batch, 65, 120)
+        x = self.model(x)
+        return x
