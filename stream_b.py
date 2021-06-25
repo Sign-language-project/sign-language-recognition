@@ -29,7 +29,9 @@ class Stream_b (nn.Module):
         for param in self.raft_model.parameters():
             param.requires_grad = False
 
+        self.batch = nn.BatchNorm3d(2)
         self.conv3di = nn.Conv3d(2 , 3 , (3,3,3) , padding = 1)
+        self.batch = nn.BatchNorm3d(3)
 
         if model == 'x3d':
             self.model = efficient_x3d_xs.E_x3d_xs(out_dim)
