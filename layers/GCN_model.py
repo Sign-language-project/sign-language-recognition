@@ -7,8 +7,8 @@ from layers.GC_block import GraphConvolution_att, GC_Block
 
 
 class Stream_a_model(nn.Module):
-    def __init__(self, out_dim, input_feature=100,
-                 hidden_feature=100, p_dropout=0.3, 
+    def __init__(self, out_dim, input_feature=120,
+                 hidden_feature=100, p_dropout=0.3,
                  num_stage=20, is_resi=True):
 
 

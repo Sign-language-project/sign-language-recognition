@@ -15,10 +15,11 @@ class Stream_b (nn.Module):
 
         super().__init__()
 
-        assert model in ['x3d', 'r2plus1d','r2plus1d_50'] , "models suported for stream A are 'x3d', 'r2plus1d'"
+        assert model in ['x3d', 'r2plus1d','r2plus1d_50'] , "models suported for stream B are 'x3d', 'r2plus1d', 'r2plus1d_50'"
 
         args = self.get_args() #get the args which are the input parameters for the model.
         self.device = device
+        self.out_dim = out_dim
         self.raft_iters = raft_iters
 
         self.raft_model = RAFT(args[0])
