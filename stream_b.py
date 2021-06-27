@@ -42,7 +42,7 @@ class Stream_b (nn.Module):
             self.model = r2plus1d_50.R2plus1d_50(out_dim)
 
         if not trainable:
-            self.model.fc = nn.Identity()
+            #self.model.fc = nn.Identity()
             #check the path of the checkpoint
             assert ckpt_path != None , "No checkpoint path is found, pass the path to the class __init__"
 
