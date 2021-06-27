@@ -18,7 +18,7 @@ class Stream_a(nn.Module):
             
             #load the checkpoint
             checkpoint = torch.load(ckpt_path)
-            self.model.load_state_dict(checkpoint['model'])
+            self.model.load_state_dict(checkpoint['state_dict'])
             
             for i, param in enumerate(self.model.parameters()):
                 param.requires_grad = False
