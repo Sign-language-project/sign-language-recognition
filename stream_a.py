@@ -22,7 +22,7 @@ class Stream_a(nn.Module):
             
             for i, param in enumerate(self.model.parameters()):
                 param.requires_grad = False
-            self.model.fc = nn.Linear(400, out_dim)
+            self.model.model.fc = nn.Linear(400, out_dim)
 
     def forward(self, x): # (batch, 65, 120)
         x = self.model(x)
