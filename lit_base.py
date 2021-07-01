@@ -34,7 +34,7 @@ class Base(pl.LightningModule):
   def training_step(self, batch, batch_index):
       *x, y = batch
       y = y.squeeze()
-      logits = self(*x)
+      logits = self(x)
       loss = self.loss_fn(logits, y)
       self.log("train_loss", loss)
       preds = logits.softmax(dim=-1)
@@ -47,7 +47,7 @@ class Base(pl.LightningModule):
   def validation_step(self, batch, batch_index):
       *x, y = batch
       y = y.squeeze()
-      logits = self(*x)
+      logits = self(x)
       preds = logits.softmax(dim=-1)
       loss = self.loss_fn(logits, y)
       self.log("val_loss", loss, prog_bar=True)
@@ -60,7 +60,7 @@ class Base(pl.LightningModule):
   def test_step(self, batch, batch_index):
     *x, y = batch
     y = y.squeeze()
-    logits = self(*x)
+    logits = self(x)
     preds = logits.softmax(dim=-1)
     loss = self.loss_fn(logits, y)
     self.log("test_loss", loss, prog_bar=True)

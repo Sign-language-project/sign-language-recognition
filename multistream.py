@@ -36,20 +36,27 @@ class MultiStream(nn.Module):
       #make sure that the output of the each stream match with the input of the concate layer
       for stream in self.streams:
         assert stream.out_dim == self.concate_dim , f"out_dim of stream {stream.__class__.__name__} doesn't match the concate dim"
+      
+      #model blocks
 
+      # The list of the streams to be trained on
+      self.streams_list = nn.ModuleList(self.streams) 
+
+      # The layer to concate and give weights to the streams outputs
       self.concate = Concate(n_streams= len(streams), in_dim= self.concate_dim, out_dim= self.latent_dim )
 
+      #the classification layers
       self.classification = nn.Sequential(
         nn.ReLU(),
         nn.Dropout(self.dropout),
         nn.Linear(self.latent_dim, self.num_classes)
       )
 
-  def forward(self, *x):
+  def forward(self, x):
 
     #run the streams
     streams_outs = []
-    for index, stream in enumerate(self.streams):
+    for index, stream in enumerate(self.streams_list):
       output = stream(x[index])
       streams_outs.append(output)
 
