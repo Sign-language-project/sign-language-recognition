@@ -18,12 +18,16 @@ class Stream_a(nn.Module):
             
             #load the checkpoint
             checkpoint = torch.load(ckpt_path)
-            self.model.model.load_state_dict(checkpoint['state_dict'])
+            weights = checkpoint['state_dict']
+            new_weights = {}
+            for key in weights.keys():
+                new_weights[key[6:]] = weights[key]
+            self.model.model.load_state_dict(new_weights)
             
             for i, param in enumerate(self.model.parameters()):
                 param.requires_grad = False
             self.model.fc = nn.Linear(400, out_dim)
 
     def forward(self, x): # (batch, 65, 120)
-        x = self.model(x)
+        x = self.model(x[0])
         return x
