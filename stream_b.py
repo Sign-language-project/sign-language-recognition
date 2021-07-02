@@ -16,6 +16,7 @@ class Stream_b (nn.Module):
         super().__init__()
 
         assert model in ['x3d', 'r2plus1d','r2plus1d_50'] , "models suported for stream B are 'x3d', 'r2plus1d', 'r2plus1d_50'"
+        self.trainable = trainable
 
         args = self.get_args() #get the args which are the input parameters for the model.
         self.device = device

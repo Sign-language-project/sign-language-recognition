@@ -10,6 +10,8 @@ class Stream_a(nn.Module):
 
         self.model = model
         self.out_dim = out_dim
+        self.trainable = trainable
+        self.ckpt_path = ckpt_path
 
         if not trainable:
             #self.model.fc = nn.Identity()
