@@ -14,5 +14,5 @@ class Stream_a(nn.Module):
         self.ckpt_path = ckpt_path
 
     def forward(self, x): # (batch, 65, 120)
-        x = self.model(x[0])
+        x = self.model(x)
         return x
