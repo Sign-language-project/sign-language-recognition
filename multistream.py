@@ -47,11 +47,16 @@ class MultiStream(nn.Module):
           assert self.streams[i].model.ckpt_path != None , f"No checkpoint path is found for {self.streams[i].__calss__.__name__}, pass the path to the class __init__"
 
           checkpoint = torch.load(self.streams[i].model.ckpt_path)
-          self.streams[i].load_state_dict(checkpoint['state_dict'])
+
+          try :
+              self.streams[i].load_state_dict(checkpoint['state_dict'])
+
+          except:
+              self.streams[i].load_state_dict(change_dict_keys(checkpoint['state_dict']))
 
           for j, param in enumerate(self.streams[i].parameters()):
             param.requires_grad = False
-            
+
         self.streams[i].model.model.fc = nn.Linear(400, self.concate_dim)
 
 
@@ -85,3 +90,16 @@ class MultiStream(nn.Module):
     out = self.classification(concated)
 
     return out
+
+
+def change_dict_keys(old_dict):
+
+    new_dict = {}
+
+    for key in old_dict.keys():
+
+        new_key = 'model.' + key
+
+        new_dict[new_key] = old_dict[key]
+
+    return new_dict
