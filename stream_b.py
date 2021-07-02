@@ -17,6 +17,7 @@ class Stream_b (nn.Module):
 
         assert model in ['x3d', 'r2plus1d','r2plus1d_50'] , "models suported for stream B are 'x3d', 'r2plus1d', 'r2plus1d_50'"
         self.trainable = trainable
+        self.ckpt_path = ckpt_path
 
         args = self.get_args() #get the args which are the input parameters for the model.
         self.device = device
@@ -41,20 +42,6 @@ class Stream_b (nn.Module):
             self.model = r2plus1d_18.R2plus1d(out_dim)
         elif model == 'r2plus1d_50':
             self.model = r2plus1d_50.R2plus1d_50(out_dim)
-
-        if not trainable:
-            #self.model.fc = nn.Identity()
-            #check the path of the checkpoint
-            assert ckpt_path != None , "No checkpoint path is found, pass the path to the class __init__"
-
-            #load the checkpoint
-            checkpoint = torch.load(ckpt_path)
-            self.model.model.load_state_dict(checkpoint['state_dict'])
-
-            for i, param in enumerate(self.model.parameters()):
-                param.requires_grad = False
-            self.model.fc = nn.Linear(400, out_dim)
-
 
 
     def forward(self , images_batch):
