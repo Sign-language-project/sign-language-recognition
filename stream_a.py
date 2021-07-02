@@ -10,28 +10,8 @@ class Stream_a(nn.Module):
 
         self.model = model
         self.out_dim = out_dim
-<<<<<<< HEAD
         self.trainable = trainable
         self.ckpt_path = ckpt_path
-=======
-
-        if not trainable:
-            #self.model.fc = nn.Identity()
-            #check the path of the checkpoint
-            assert ckpt_path != None , "No checkpoint path is found, pass the path to the class __init__"
-            
-            #load the checkpoint
-            checkpoint = torch.load(ckpt_path)
-            weights = checkpoint['state_dict']
-            new_weights = {}
-            for key in weights.keys():
-                new_weights[key[6:]] = weights[key]
-            self.model.model.load_state_dict(new_weights)
-            
-            for i, param in enumerate(self.model.parameters()):
-                param.requires_grad = False
-            self.model.fc = nn.Linear(400, out_dim)
->>>>>>> d3edeed5d195f3e403ece6b38ccd71ed65bdaebe
 
     def forward(self, x): # (batch, 65, 120)
         x = self.model(x[0])
