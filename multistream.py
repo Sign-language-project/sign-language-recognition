@@ -34,22 +34,22 @@ class MultiStream(nn.Module):
       self.streams = streams
 
       #make sure that the output of the each stream match with the input of the concate layer
-      for stream in self.streams:
-        assert stream.out_dim == self.concate_dim , f"out_dim of stream {stream.__class__.__name__} doesn't match the concate dim"
+      #for stream in self.streams:
+      #  assert stream.out_dim == self.concate_dim , f"out_dim of stream {stream.__class__.__name__} doesn't match the concate dim"
       
       #make the streams lightening modules, load the checkpoints if needed
       for i in range(len(self.streams)):
         self.streams[i] = Base(self.streams[i])
         
         #load the checkpoints of the to-be-freezed streams
-        if self.streams[i].trainable == False:
+        if self.streams[i].model.trainable == False:
           self.streams[i].model.fc = nn.Identity()
-          assert self.streams[i].ckpt_path != None , f"No checkpoint path is found for {self.streams[i].__calss__.__name__}, pass the path to the class __init__"
+          assert self.streams[i].model.ckpt_path != None , f"No checkpoint path is found for {self.streams[i].__calss__.__name__}, pass the path to the class __init__"
 
-          checkpoint = torch.load(self.streams[i].ckpt_path)
+          checkpoint = torch.load(self.streams[i].model.ckpt_path)
           self.streams[i].load_state_dict(checkpoint['state_dict'])
 
-          for i, param in enumerate(self.streams[i].parameters()):
+          for j, param in enumerate(self.streams[i].parameters()):
             param.requires_grad = False
             self.streams[i].model.fc = nn.Linear(400, self.concate_dim)
 
