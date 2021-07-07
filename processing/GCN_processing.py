@@ -5,19 +5,19 @@ import random
 import torch
 import cv2
 import numpy as np
-import os
 
 
 class GCN_processing ():
-    
+    def __init__(self) -> None:
+        pass
 
-    def make_processed_pt (self, video_pt):
-        # takes Pt file of the video and return a tensor of (65,120) shape as input to stream a
+    def __call__ (self, video_pt):
+        # takes Pt file of the video and return a tensor of (65,120) shape as input to stream_a
   
         frame_start = 0
         frame_end = video_pt.size(0) -1
         
-        frames_to_sample = self.rand_start_sampling(frame_start, frame_end) # 60 or less frame to sample from
+        frames_to_sample = self.rand_start_sampling(frame_start=frame_start, frame_end=frame_end,num_samples=60) # 60 or less frame to sample from
         
         frames = []
         for i in frames_to_sample:
@@ -33,7 +33,7 @@ class GCN_processing ():
             poses = []
             for i in range(images.size(0)):
                 results = holistic.process(cv2.cvtColor(np.array(images[i,:,:,:]), cv2.COLOR_BGR2RGB))
-                xy  = self.get_pose(results)
+                xy  = self.get_pose(results=results)
                 poses.append(xy)
 
             pad = None
@@ -48,9 +48,8 @@ class GCN_processing ():
 
         return poses_across_time
 
-    
 
-    def rand_start_sampling(frame_start, frame_end, num_samples=60): 
+    def rand_start_sampling(self, frame_start, frame_end, num_samples=60): 
         """Randomly select a starting point and return the continuous ${num_samples} frames."""
         num_frames = frame_end - frame_start + 1
 
@@ -64,7 +63,7 @@ class GCN_processing ():
         return frames_to_sample
 
         
-    def get_pose (results):
+    def get_pose (self, results):
         # takes mediabibe holistic object and return the posses of each frame in shape (65,2)
         x = [] 
         y = []
@@ -94,4 +93,3 @@ class GCN_processing ():
 
         
         return torch.stack([torch.tensor(x), torch.tensor(y)]).transpose_(0, 1)
-        
