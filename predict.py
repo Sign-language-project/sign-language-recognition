@@ -11,7 +11,7 @@ class predict:
         self,
         model: LightningModule,
         streams: str,
-        words_Ids_csv_path = "words_ids\SignList_ClassId_TR_EN.csv",
+        words_Ids_csv_path = "words_ids/SignList_ClassId_TR_EN.csv",
         device = 'cpu'
         ):
 
@@ -26,7 +26,7 @@ class predict:
 
         video = ProcessVideo(sample= False)(video_path) #(T, C, H, W)
 
-        video = video.permute(0, 3, 1, 2) #(T, H, W, C)
+        #video = video.permute(0, 3, 1, 2) #(T, H, W, C)
 
         processed = GCN_processing()(video)
 
@@ -34,19 +34,23 @@ class predict:
     
     def prepare_for_stream_c(self, video_path):
 
-        video = ProcessVideo()(video_path) #(T, C, H, W)
+        video = ProcessVideo(sample = True)(video_path) #(T, C, H, W)
+        #print(video.shape)
 
-        video = video.permute(0, 2, 3, 1)  #(T , H, W, C)
+        #video = video.permute(0, 2, 3, 1)  #(T , H, W, C)
+        video = video.numpy() #transforms expect np array
+        #print(video.shape)
 
         processed = self.transforms(video)
 
         return processed
     
-    def  prepare_for_stream_b(self, video_path):
+    def  prepare_for_stream_b(self,video_path):
 
-        video = ProcessVideo()(video_path) #(T, C, H, W)
+        video = ProcessVideo(sample=True)(video_path) #(T, C, H, W)
 
-        video = video.permute(0, 2, 3, 1) #(T, H, W, C)
+        #video = video.permute(0, 2, 3, 1) #(T, H, W, C)
+        video = video.numpy() #transforms expect np array
 
         processed = self.transforms_raft(video) #shape (C ,T, H, W)
 
@@ -60,12 +64,15 @@ class predict:
         for stream in self.streams:
             if stream == 'a':
                 video = self.prepare_for_stream_a(video_path)
+                video = torch.unsqueeze(video, 0)
                 videos.append(video)
             if stream == 'b':
                 video = self.prepare_for_stream_b(video_path)
+                video = torch.unsqueeze(video, 0)
                 videos.append(video)
             if stream == 'c':
                 video = self.prepare_for_stream_c(video_path)
+                video = torch.unsqueeze(video, 0)
                 videos.append(video)
 
         #Eval mode for the model        
@@ -79,8 +86,8 @@ class predict:
 
         #get the outputs
         top_5 = torch.topk(soft_out, k =5, sorted= True)
-        words_indices = top_5[1].numpy()
-        words_probs = top_5[0].numpy()
+        words_indices = top_5[1].squeeze().numpy()
+        words_probs = top_5[0].squeeze().detach().numpy()
 
         words = self.word_id_df.loc[words_indices, 'EN'].tolist()  #English words
 

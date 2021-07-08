@@ -21,8 +21,9 @@ class ProcessVideo:
         #sample the video
         if self.sample:
             video = self.get_sampled_video(video, org_fps = 30)
-            
-        video = video.permute(3, 0, 1, 2) #T, C, H, W
+        
+        #print(video.shape)
+        #video = video.permute(3, 0, 1, 2) #T, C, H, W
         return video
 
     
