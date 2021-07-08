@@ -75,7 +75,7 @@ class MultiStream(nn.Module):
         nn.Linear(self.latent_dim, self.num_classes)
       )
 
-  def forward(self, x):
+  def forward(self, *x):
 
     #run the streams
     streams_outs = []
